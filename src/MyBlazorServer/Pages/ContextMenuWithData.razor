@@ -1,0 +1,105 @@
+@page "/contextmenu-with-data"
+@using CSharpVitamins
+
+<style>
+    table {
+        border-collapse: collapse;
+        font-family: Tahoma, Geneva, sans-serif;
+        width: 30%;
+    }
+    table td {
+        padding: 15px;
+    }
+    table thead td {
+        background-color: #54585d;
+        color: #ffffff;
+        font-weight: bold;
+        font-size: 13px;
+        border: 1px solid #54585d;
+    }
+    table tbody td {
+        color: #636363;
+        border: 1px solid #dddfe1;
+    }
+    table tbody tr {
+        background-color: #f9fafb;
+    }
+</style>
+
+
+<ContextMenu Id="myMenu">
+    <Item OnClick="@AddItem">Add New Item</Item>
+    <Item  OnClick="@DeleteItem">Delete Item</Item>
+</ContextMenu>
+
+<h1>My Stupid Items</h1>
+
+<table id="items">
+    <tr>
+        <th>Item Id</th>
+        <th>Item Name</th>
+    </tr>
+    @foreach (var curItem in _myItems)
+    {
+        <tr>
+            <td>
+                <ContextMenuTrigger MenuId="myMenu" Data="@curItem">
+                    @curItem.Id
+                </ContextMenuTrigger>
+            </td>
+            <td>
+                <ContextMenuTrigger MenuId="myMenu" Data="@curItem">
+                    @curItem.Name
+                </ContextMenuTrigger>
+            </td>
+        </tr>
+    }
+</table>
+
+@code {
+
+    readonly List<MyItem> _myItems = new List<MyItem>();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        _myItems.Add(new MyItem(){Id = ShortGuid.NewGuid().ToString(), Name = "Item 1"});
+        _myItems.Add(new MyItem(){Id = ShortGuid.NewGuid().ToString(), Name = "Item 2"});
+        _myItems.Add(new MyItem(){Id = ShortGuid.NewGuid().ToString(), Name = "Item 3"});
+
+        await base.OnInitializedAsync();
+    }
+
+    private void DeleteItem(ItemClickEventArgs itemClickEventArgs)
+    {
+        var myItem = (MyItem)itemClickEventArgs.Data;
+        _myItems.Remove(myItem);
+        StateHasChanged();
+
+    }
+
+    private void AddItem(ItemClickEventArgs itemClickEventArgs)
+    {
+        var myItem = (MyItem)itemClickEventArgs.Data;
+        var myItemsCount = _myItems.Count + 1;
+
+        var newItem = new MyItem
+        {
+            Id = ShortGuid.NewGuid().ToString(),
+            Name = $"Item {myItemsCount}"
+        };
+
+        _myItems.Add(newItem);
+        StateHasChanged();
+    }
+
+
+
+    internal class MyItem
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+    }
+}
+
+
